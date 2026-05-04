@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .models import UserBank
 from decimal import Decimal
 
+from django.views.decorators.csrf import csrf_exempt # import for csrf_exempt
+
+@csrf_exempt # from now, the view will accept requests without a valid CSRF token
+# to fix the flaw you need to comment or delete the above line
 @login_required
 def home(request):
 

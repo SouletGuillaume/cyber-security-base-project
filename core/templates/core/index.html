@@ -15,7 +15,8 @@
 
         <h3>Send Money</h3>
         <form method="POST">
-            {% csrf_token %}
+            <!--{% csrf_token %}--> <!-- by omitted this token, the view will accept requests without a valid CSRF token -->
+            <!-- to fix the flaw, uncomment the line above -->
             <label for="iban">IBAN of the recipient:</label><br>
             <input type="text" id="iban" name="iban" ><br>
 

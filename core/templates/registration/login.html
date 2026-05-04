@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bank lotOfMoney</title>
+</head>
+<body>
+
+    <h2>Connexion space</h2>
+    
+        <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+  
+  {{ form.as_p }}
+            <button type="submit" style="padding: 10px; width: 100%; cursor: pointer;">
+                login
+            </button>
+        </form>
+
+</body>
+</html>

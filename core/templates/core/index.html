@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank lotOfMoney</title>
+</head>
+<body>
+    <h1>Bank lotOfMoney</h1>
+
+    {% if user.is_authenticated %}
+        <p>Welcome,{{ user.username }}! </p>
+        <div>
+            <h3>your account balance</h3>
+            <p>{{ balance }} €</p>
+        </div>
+
+        <h3>Send Money</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="iban">IBAN of the recipient:</label><br>
+            <input type="text" id="iban" name="iban" ><br>
+
+            <label for="amount">Amount :</label><br>
+            <input type="number" id="amount" name="amount"><br>
+
+            <button>Send</button>
+        </form>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
+        {% else %}
+        <p><a href="{% url 'login' %}">login</a> to access your bank account</p>
+        {% endif %}
+</body>
+</html>
+

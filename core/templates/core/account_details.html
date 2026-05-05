@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Account Details</title>
+</head>
+<body>
+
+    <h2>Your bank account details</h2>
+    
+    <div>
+        <p>account user : {{ account.user.username }}</p>
+        <p>account id : {{ account.id }}</p>
+        <p>current balance : {{ account.balance }} €</p>
+    </div>
+
+    <br>
+    <a href="{% url 'home' %}">Back to Home</a>
+
+</body>
+</html>

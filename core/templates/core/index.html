@@ -12,6 +12,10 @@
             <h3>your account balance</h3>
             <p>{{ balance }} €</p>
         </div>
+        <p>
+            <!-- redirect the user to the bank account details page -->
+            <a href="{% url 'account_details' account_id=request.user.userbank_set.first.id %}">View your bank account details</a>
+        </p>
 
         <h3>Send Money</h3>
         <form method="POST">

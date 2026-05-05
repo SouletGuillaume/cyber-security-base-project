@@ -15,8 +15,8 @@
 
         <h3>Send Money</h3>
         <form method="POST">
-            <!--{% csrf_token %}--> <!-- by omitted this token, the view will accept requests without a valid CSRF token -->
-            <!-- to fix the flaw, uncomment the line above -->
+            <!--{% csrf_token %}--> <!-- FLAW 1 CSRF; by omitted this token, the view will accept requests without a valid CSRF token -->
+            <!-- FIX 1; to fix the flaw, uncomment the line above -->
             <label for="iban">IBAN of the recipient:</label><br>
             <input type="text" id="iban" name="iban" ><br>
 
@@ -25,6 +25,19 @@
 
             <button>Send</button>
         </form>
+        {% if request.session.last_iban %}
+        <!-- this block shows the last sent iban-->
+        <div>
+            <p>last transfert was to: </p>
+            
+            <!-- --- FLAW 2; xss cross scripting--- -->
+            <!-- the '|safe' filter disables Django's auto-escaping, allowing malicious scripts to run -->
+            <p>{{ request.session.last_iban|safe }}</p>
+
+            <!-- FIX 2; to fix this, remove the '|safe' filter so Django securely escapes HTML characters -->
+            <!--<p>{{ request.session.last_iban }}</p>--> <!-- you can also uncomment this line-->
+        </div>
+        {% endif %}
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
             <button type="submit">Logout</button>

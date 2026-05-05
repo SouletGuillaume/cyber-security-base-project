@@ -23,13 +23,14 @@ def home(request):
         amount_raw = request.POST.get('amount', 0)
         iban = request.POST.get('iban')
         
-        if amount_raw and amount_raw.isdecimal() and iban.isalnum():
+        if amount_raw and amount_raw.isdecimal() and iban: # we remove iban format check (and iban.isalnum()) to make the cross-site scripting vulnerability possible
             amount = Decimal(amount_raw)
             # check if the amount is valid and if the user has enough balance
             if 0 < amount <= current_balance:
 
                 account.balance -= amount
                 account.save()
+                request.session['last_iban'] = iban # save the iban to show it in the page
                 print(f"{amount} € sent to {iban}")
                 return redirect('home')
             

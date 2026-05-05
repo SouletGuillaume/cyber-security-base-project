@@ -15,8 +15,18 @@
 
         <h3>Send Money</h3>
         <form method="POST">
-            <!--{% csrf_token %}--> <!-- FLAW 1 CSRF; by omitted this token, the view will accept requests without a valid CSRF token -->
-            <!-- FIX 1; to fix the flaw, uncomment the line above -->
+
+            <!-- FLAW 1 CSRF; Cross-Site Request Forgery vulnerability. Without a CSRF token, attackers can forge requests
+            to transfer money on behalf of authenticated users from malicious websites.
+            As an example, the hacker_csrf.html file in this project demonstrates how an attacker can create a fake page 
+            to trick users into submitting unauthorized requests to the bank application.-->
+            
+            <!--{% csrf_token %}--> 
+
+            <!-- FIX 1; to fix the flaw, uncomment the line above. 
+            uncommenting the token will enable Django's built-in CSRF protection, which verifies a unique session token on every POST request to guarantee 
+            it originated from this legitimate form and not a malicious third-party site. -->            
+            
             <label for="iban">IBAN of the recipient:</label><br>
             <input type="text" id="iban" name="iban" ><br>
 
@@ -29,13 +39,16 @@
         <!-- this block shows the last sent iban-->
         <div>
             <p>last transfert was to: </p>
-            
-            <!-- --- FLAW 2; xss cross scripting--- -->
-            <!-- the '|safe' filter disables Django's auto-escaping, allowing malicious scripts to run -->
-            <p>{{ request.session.last_iban|safe }}</p>
-
-            <!-- FIX 2; to fix this, remove the '|safe' filter so Django securely escapes HTML characters -->
-            <!--<p>{{ request.session.last_iban }}</p>--> <!-- you can also uncomment this line-->
+            <!-- FLAW 2; Cross-Site Scripting vulnerability. By using the '|safe' filter, we explicitly disable Django's automatic HTML escaping. 
+                 This allows any malicious JavaScript payload stored in the session to be executed 
+                 directly by the victim's browser instead of being rendered as harmless text. --> 
+            <p>{{ request.session.last_iban|safe }}</p> 
+            <!-- --- FIX 2 --- --> 
+            <!-- To fix this vulnerability, remove the '|safe' filter. By default, Django automatically 
+                 escapes dangerous HTML characters (converting '<' to '&lt;', etc...). This ensures the 
+                 browser treats the input strictly as plain data, neutralizing any injected scripts. --> 
+            <!-- Uncomment the line below and comment/remove the vulnerable line above to apply the fix: -->
+            <!-- <p>{{ request.session.last_iban }}</p> -->
         </div>
         {% endif %}
         <form action="{% url 'logout' %}" method="post">

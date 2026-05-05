@@ -5,8 +5,11 @@ from decimal import Decimal
 
 from django.views.decorators.csrf import csrf_exempt # import for csrf_exempt
 
-@csrf_exempt # from now, the view will accept requests without a valid CSRF token
-# to fix the flaw you need to comment or delete the above line
+# FLAW 1; leave uncommented the @csrf_exempt decorator to make the view accept requests without a valid CSRF token, 
+# making it vulnerable to csrf attacks
+@csrf_exempt 
+# FIX 1; to fix the flaw you need to comment or delete the above line
+
 @login_required
 def home(request):
 

@@ -1,9 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import UserBank
+from .models import Transaction, UserBank
 from decimal import Decimal
+import hashlib
 
 from django.views.decorators.csrf import csrf_exempt # import for csrf_exempt
+
+
+def encrypt_iban(iban):
+    # Simple hashing for protection at rest
+    return hashlib.sha256(iban.encode('utf-8')).hexdigest()
 
 # FLAW 1; leave uncommented the @csrf_exempt decorator to make the view accept requests without a valid CSRF token, 
 # making it vulnerable to csrf attacks
@@ -30,6 +36,18 @@ def home(request):
             amount = Decimal(amount_raw)
             # check if the amount is valid and if the user has enough balance
             if 0 < amount <= current_balance:
+
+                # FLAW 4 cryptographic failure 
+                # The sensitive receiver_iban is saved directly in plain text in the database.
+                # If the database is compromised, all sensitive financial identifiers are exposed.
+                Transaction.objects.create(sender=request.user, receiver_iban=iban, amount=amount)
+
+                # FIX 4 
+                # To fix this, sensitive data should be encrypted at rest using a strong 
+                # encryption algorithm (like AES) or hashed if comparison is all that's needed.
+                # to apply the fix uncomment the line below and comment the vulnerable line above:
+                # encrypted_iban = encrypt_iban(iban) 
+                # Transaction.objects.create(sender=request.user, receiver_iban=encrypted_iban, amount=amount)
 
                 account.balance -= amount
                 account.save()

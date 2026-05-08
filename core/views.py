@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Transaction, UserBank
 from decimal import Decimal
+from django.conf import settings
+
+from cryptography.fernet import Fernet
+import base64
 import hashlib
 
 from django.views.decorators.csrf import csrf_exempt # import for csrf_exempt
@@ -10,9 +14,22 @@ import logging
 logger = logging.getLogger(__name__) # used for flaw 5, to log critical security events
 
 
+# usage of fernet encryption for flaw 4
+# generates a fernet instance using a key derived from the Django SECRET_KEY
+def _get_fernet():
+    key = getattr(settings, 'FERNET_SECRET_KEY', None)
+    if key is None:
+        digest = hashlib.sha256(settings.SECRET_KEY.encode('utf-8')).digest()
+        key = base64.urlsafe_b64encode(digest)
+    elif isinstance(key, str):
+        key = key.encode('utf-8')
+    return Fernet(key)
+
+
 def encrypt_iban(iban):
-    # simple hashing for protection at rest
-    return hashlib.sha256(iban.encode('utf-8')).hexdigest()
+    # encrypt the IBAN using Fernet for protection at rest
+    fernet = _get_fernet()
+    return fernet.encrypt(iban.encode('utf-8')).decode('utf-8')
 
 # FLAW 1; leave uncommented the @csrf_exempt decorator to make the view accept requests without a valid CSRF token, 
 # making it vulnerable to csrf attacks

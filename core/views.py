@@ -14,21 +14,18 @@ import logging
 logger = logging.getLogger(__name__) # used for flaw 5, to log critical security events
 
 
-# usage of fernet encryption for flaw 4
-# generates a fernet instance using a key derived from the Django SECRET_KEY
-def _get_fernet():
-    key = getattr(settings, 'FERNET_SECRET_KEY', None)
-    if key is None:
-        digest = hashlib.sha256(settings.SECRET_KEY.encode('utf-8')).digest()
-        key = base64.urlsafe_b64encode(digest)
-    elif isinstance(key, str):
-        key = key.encode('utf-8')
-    return Fernet(key)
+def _get_fernet(): 
+    #derives a stable 32-byte Fernet key from Django's SECRET_KEY via SHA-256 to securely encrypt data at rest.
+    key = getattr(settings, 'FERNET_SECRET_KEY', None) 
+    if key is None: 
+        digest = hashlib.sha256(settings.SECRET_KEY.encode('utf-8')).digest() 
+        key = base64.urlsafe_b64encode(digest) 
+    elif isinstance(key, str): 
+        key = key.encode('utf-8') 
+    return Fernet(key) 
 
-
-def encrypt_iban(iban):
-    # encrypt the IBAN using Fernet for protection at rest
-    fernet = _get_fernet()
+def encrypt_iban(iban): 
+    fernet = _get_fernet() 
     return fernet.encrypt(iban.encode('utf-8')).decode('utf-8')
 
 # FLAW 1; leave uncommented the @csrf_exempt decorator to make the view accept requests without a valid CSRF token, 
@@ -60,14 +57,14 @@ def home(request):
                 # FLAW 4 cryptographic failure 
                 # The sensitive receiver_iban is saved directly in plain text in the database.
                 # If the database is compromised, all sensitive financial identifiers are exposed.
-                Transaction.objects.create(sender=request.user, receiver_iban=iban, amount=amount)
+                # Transaction.objects.create(sender=request.user, receiver_iban=iban, amount=amount)
 
                 # FIX 4 
                 # To fix this, sensitive data should be encrypted at rest using a strong 
-                # encryption algorithm (like AES) or hashed if comparison is all that's needed.
+                # encryption algorithm (like Fernet) or hashed if comparison is all that's needed.
                 # to apply the fix uncomment the line below and comment the vulnerable line above:
-                # encrypted_iban = encrypt_iban(iban) 
-                # Transaction.objects.create(sender=request.user, receiver_iban=encrypted_iban, amount=amount)
+                encrypted_iban = encrypt_iban(iban) 
+                Transaction.objects.create(sender=request.user, receiver_iban=encrypted_iban, amount=amount)
 
                 account.balance -= amount
                 account.save()
@@ -103,6 +100,6 @@ def account_details(request, account_id):
     # We query the database to ensure both the account ID AND the user match the logged-in user.
 
     # Uncomment the line below and comment the vulnerable line above to apply the fix:
-    #account = get_object_or_404(UserBank, id=account_id, user=request.user)
+    # account = get_object_or_404(UserBank, id=account_id, user=request.user)
     
     return render(request, 'core/account_details.html', {'account': account})

@@ -57,14 +57,14 @@ def home(request):
                 # FLAW 4 cryptographic failure 
                 # The sensitive receiver_iban is saved directly in plain text in the database.
                 # If the database is compromised, all sensitive financial identifiers are exposed.
-                # Transaction.objects.create(sender=request.user, receiver_iban=iban, amount=amount)
+                Transaction.objects.create(sender=request.user, receiver_iban=iban, amount=amount)
 
                 # FIX 4 
                 # To fix this, sensitive data should be encrypted at rest using a strong 
                 # encryption algorithm (like Fernet) or hashed if comparison is all that's needed.
                 # to apply the fix uncomment the line below and comment the vulnerable line above:
-                encrypted_iban = encrypt_iban(iban) 
-                Transaction.objects.create(sender=request.user, receiver_iban=encrypted_iban, amount=amount)
+                # encrypted_iban = encrypt_iban(iban) 
+                # Transaction.objects.create(sender=request.user, receiver_iban=encrypted_iban, amount=amount)
 
                 account.balance -= amount
                 account.save()

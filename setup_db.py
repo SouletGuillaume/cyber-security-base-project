@@ -10,13 +10,15 @@ from core.models import UserBank
 User.objects.all().delete() # delete all existing users
 
 admin = User.objects.create_superuser('admin', '', 'admin123') # simulate an admin user
+UserBank.objects.create(user=admin, balance=50000)
 
-# list of users to create
+# list of users to create (username, password, balance)
 users = [
-    ('alice', 'redqueen'),
-    ('bob', 'spongebob')
+    ('alice', 'redqueen', 100),
+    ('bob', 'spongebob', 250)
 ]
 
-# create users and their bank accounts
-for username, password in users:
-    User.objects.create_user(username=username, password=password)
+for username, password, balance in users:
+    new_user = User.objects.create_user(username=username, password=password)   
+    UserBank.objects.create(user=new_user, balance=balance)
+

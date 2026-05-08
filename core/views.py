@@ -6,9 +6,12 @@ import hashlib
 
 from django.views.decorators.csrf import csrf_exempt # import for csrf_exempt
 
+import logging
+logger = logging.getLogger(__name__) # used for flaw 5, to log critical security events
+
 
 def encrypt_iban(iban):
-    # Simple hashing for protection at rest
+    # simple hashing for protection at rest
     return hashlib.sha256(iban.encode('utf-8')).hexdigest()
 
 # FLAW 1; leave uncommented the @csrf_exempt decorator to make the view accept requests without a valid CSRF token, 
@@ -56,9 +59,16 @@ def home(request):
                 return redirect('home')
             
             else:
-                print("invalid transfer amount or not enough balance, transfer failed")
-        else:
-            print("invalid number or iban format, transfer failed")
+                #FLAW 5: security logging and monitoring failures
+                #if an attacker is trying to send more money than they have (potential fraud).
+                #here, the application simply does nothing and provides no trace for the administrater. 
+                pass
+                #FIX 5
+                # critical security events must be logged with enough detail (who, when, what) 
+                #to allow detection of ongoing attacks.
+                # logger.warning(f"SECURITY: Unauthorized transfer attempt by user {request.user.username}. "
+                #                f"Attempted amount: {amount}€ to IBAN {iban}. Balance insufficient.")
+
 
     return render(request, 'core/index.html', {'balance': account.balance})
 
